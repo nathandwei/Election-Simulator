@@ -1,0 +1,9 @@
+numpy
+flask
+flask_session
+scipy
+Flask-SQLAlchemy
+faker
+matplotlib.colors
+werkzeug
+SQLAlchemy

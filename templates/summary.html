@@ -1,0 +1,128 @@
+{% extends "layout.html" %}
+{% block title %}
+Summary
+{% endblock %}
+{% block main %}
+<h1 class="my-3 text-center">Summary</h1>
+<div class="my-3">
+   <div class="card mb-4">
+      <div class="card-body">
+         <h5 class="text-primary">Popular Vote:</h5>
+         <table class="table table-striped table-bordered mt-3">
+            <thead>
+               <tr>
+                  <th>Candidate</th>
+                  <th>Votes</th>
+               </tr>
+            </thead>
+            <tbody>
+               {% for candidate, votes in candidate_dict.items() %}
+               <tr>
+                  <td><b>{{ candidate.name }}</b></td>
+                  <td><b>{{ votes }}</b></td>
+               </tr>
+               {% endfor %}
+            </tbody>
+         </table>
+         <h5 class="text-primary mt-4">Ranked-Choice Vote:</h5>
+         {% for ranked_dict in ranked_dict_list %}
+         <div class="card mt-3">
+            <div class="card-header">
+               <h6>Round {{ ranked_dict.round }}:</h6>
+            </div>
+            <div class="card-body">
+               <table class="table table-striped table-bordered mt-3">
+                  <thead>
+                     <tr>
+                        <th>Candidate</th>
+                        <th>Votes</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     {% for candidate, votes in ranked_dict.vote_counts.items() %}
+                     <tr>
+                        <td>{{ candidate.name }}</td> 
+                        <td>{{ votes }}</td>
+                     </tr>
+                     {% endfor %}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         {% endfor %}
+         <h5 class="text-primary mt-4">Tideman Vote:</h5>
+         {% for candidate, win_list in tideman_win_dict.items() %}
+         <div class="card mt-3">
+            <div class="card-header">
+               <h6>{{ candidate.name }} defeated:</h6>
+            </div>
+            <div class="card-body">
+               <ul class="list-group list-group-flush">
+                  {% for win in win_list %}
+                  <li class="list-group-item">{{ win.name }}</li>
+                  {% endfor %}
+               </ul>
+            </div>
+         </div>
+         {% endfor %}
+      </div>
+   </div>
+</div>
+<div class="my-3 text-center">
+   {% if not saved %}
+   <p>
+      Click below to save this simulation. You must be logged in to do this.<br>
+   </p>
+   <div class="flex-container">
+      <form action="/summary" method="post"> 
+         <input type="hidden" name="action" value="save">
+         <button class="btn btn-primary centered-button" type="submit">Save</button>
+      </form>
+   </div>
+   {% else %}
+   <p>
+      Simulation saved successfully!
+   </p>
+   {% endif %}
+</div>
+<div class="my-3 text-center">
+   <p>
+      Alternatively, head back to the homepage and start a new simulation.<br>
+   </p>
+   <div class="flex-container">
+      <form action="/summary" method="post"> 
+         <input type="hidden" name="action" value="homepage">
+         <button class="btn btn-primary centered-button" type="submit">Back to Homepage</button>
+      </form>
+   </div>
+</div>
+<div>
+   <div class="wave"></div>
+   <div class="wave"></div>
+   <div class="wave"></div>
+</div>
+{% endblock %}
+
+
+
+
+
+<!-- {% if simulate_mode == "simulate_100" or simulate_mode == "simulate_n" %}
+   <div class="my-3 text-center">
+       <p>
+           Here is a summary of the win counts for simulating {{ n }} times.<br>
+           <br>
+           Ranked-Choice Vote: <br>
+           <br>
+           {% for candidate, wins in ranked_win_count.items() %}
+               Candidate <b>{{ candidate }}</b> won <b>{{ wins }}</b> simulations.<br>
+           {% endfor %}
+           <br>
+           Tideman Vote:<br>
+           <br>
+           {% for candidate, wins in tideman_win_count.items() %}
+               Candidate <b>{{ candidate }}</b> won <b>{{ wins }}</b> simulations.<br>
+           {% endfor %}
+       </p>
+   </div>
+   {% endif %} -->

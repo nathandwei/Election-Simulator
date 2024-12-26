@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    User Simulations
+{% endblock %}
+
+{% block main %}
+    <h1 class="my-3 text-center">Saved Simulations</h1>
+    <div class = "my-3 text-center">
+        <p>
+            Below, you can view simulations that you have saved.<br>
+            -1 means all the way left, 1 is all the way right, 0 is exact center. <br>
+        </p>
+        <div id="card-container"></div>
+        <script>
+            const cardContainer = document.getElementById('card-container');
+
+            function createCard(title, content) {
+                const card = document.createElement('div');
+                card.classList.add('card');
+
+                const cardTitle = document.createElement('h2');
+                cardTitle.textContent = title;
+
+                const cardContent = document.createElement('p');
+                cardContent.innerHTML = content;
+
+                card.appendChild(cardTitle);
+                card.appendChild(cardContent);
+
+                return card;
+            }
+
+            const cards = JSON.parse('{{ cards | tojson | safe }}');
+            for (var card of cards){
+                cardContainer.appendChild(createCard(card["title"], card["content"]));
+            }
+        </script>
+    </div>
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+{% endblock %}

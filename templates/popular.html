@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Popular Vote
+{% endblock %}
+
+{% block script %}
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+    </script>
+{% endblock %}
+
+{% block main %}
+    <h1 class="my-3 text-center">Popular Vote</h1>
+    <div class="my-3 text-center">
+        <p>
+            Below, you can see how many votes each candidate got. <br>
+            Hit the button below to proceed to the next simulation.
+        </p>
+    </div>
+    <div class="my-3 text-center">
+        <canvas id="popularVoteChart"></canvas>
+        <script>
+            const xValues = JSON.parse('{{ candidates | tojson | safe }}');
+            const yValues = JSON.parse('{{ vote_numbers | tojson | safe }}');
+            const barColors = JSON.parse('{{ bar_colors | tojson | safe }}');
+            const barOutlines = JSON.parse('{{ bar_outlines | tojson | safe }}');
+            Chart.defaults.color = "#ffffff";
+            // Display bar graph
+            new Chart("popularVoteChart", {
+                type: "bar",
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        backgroundColor: barColors,
+                        borderColor: barOutlines,
+                        borderWidth: 2,
+                        data: yValues
+                    }]
+                },
+                options: {
+                    legend: {display: false},
+                    title: {
+                        display: true,
+                        text: "Popular Vote Chart",
+                        fontColor: "white"
+                    },
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                fontColor: "white"
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                fontColor: "white"
+                            }
+                        }]
+                    }
+                },
+            });
+        </script>
+    </div>
+    <div class="flex-container">
+        <form action="/popular", method="post">
+            <button class="btn btn-primary centered-button" type="submit">Proceed</button>
+        </form>
+    </div>
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+{% endblock %}

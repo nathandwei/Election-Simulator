@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Ranked-Choice Vote
+{% endblock %}
+
+{% block script %}
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+    </script>
+{% endblock %}
+
+{% block main %}
+    <h1 class="my-3 text-center">Ranked-Choice Vote: Round {{ round+1 }}</h1>
+    <div class="my-3 text-center">
+        {% if win_numbers != "NOT AVAILABLE" %}
+            <p>
+                For 100 simulations, each simulation may have a different number of rounds. <br>
+                Therefore, shown below is a ranked-choice simulation randomly chosen out of 100.<br>
+            </p>
+        {% endif %}
+        <p>
+            Below, you can see how many votes each candidate got in round {{ round+1 }}.<br>
+            Hit "Next Round" to proceed to the next round of ranked-choice voting.<br>
+            Alternatively, hit "Proceed" to proceed to the next simulation.
+        </p>
+    </div>
+    <div class="my-3 text-center">
+        <canvas id="rankedChoiceVoteChart"></canvas>
+        <script>
+            const xValues = JSON.parse('{{ candidates | tojson | safe }}');
+            const yValues = JSON.parse('{{ vote_numbers | tojson | safe }}');
+            const barColors = JSON.parse('{{ bar_colors | tojson | safe }}');
+            const barOutlines = JSON.parse('{{ bar_outlines | tojson | safe }}');
+            Chart.defaults.color = "#ffffff";
+            // Display bar graph
+            new Chart("rankedChoiceVoteChart", {
+                type: "bar",
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        backgroundColor: barColors,
+                        borderColor: barOutlines,
+                        borderWidth: 2,
+                        data: yValues
+                    }]
+                },
+                options: {
+                    legend: {display: false},
+                    title: {
+                        display: true,
+                        text: "Ranked-Choice Vote Chart",
+                        fontColor: "white"
+                    },
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                fontColor: "white"
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                fontColor: "white"
+                            }
+                        }]
+                    }
+                },
+            });
+        </script>
+    </div>
+    <div class="my-3 flex-container">
+        <form action="/ranked", method="post">
+            <input type="hidden" name="action" value="next_round">
+            <button class="btn btn-primary centered-button" type="submit">Next Round</button>
+        </form>
+    </div>
+    <div class="flex-container">
+        <form action="/ranked", method="post">
+            <input type="hidden" name="action" value="proceed">
+            <button class="btn btn-primary centered-button" type="submit">Proceed</button>
+        </form>
+    </div>
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+{% endblock %}

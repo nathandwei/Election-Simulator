@@ -1,0 +1,128 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Election Simulator
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+{% endblock %}
+
+{% block main %}
+    <h1 class="my-3 text-center">Election Simulator</h1>
+    <div class="my-3 text-center">
+        <p>
+            Welcome to the election simulator. <br>
+            Here, you can simulate the results of elections with different algorithms, including popular vote, ranked choice, and more. <br>
+            The political ideology of each candidate runs from left to right. <br>
+            Click on the grey bar to add candidates, and click on a candidate to delete it. Click below to run your simulation. <br>
+        </p>
+    </div>
+    <div class="my-5 text-center">
+        <form action="/", method="post">
+            <input type="hidden" name="action" value="choose_distribution">
+            <select name="distribution_type" id="distribution_type">
+                {% for type, name in distribution_order.items() %}
+                    <option value="{{ type }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary centered-button" type="submit">Choose Distribution</button>
+        </form>
+    </div>
+    <div class="my-3 text-center">
+        <p>
+            You have chosen a {{ distribution_type }} distribution.<br>
+        </p>
+        <canvas id="distributionChart" width="1000" height="500"></canvas>
+        <script>
+            const xValues = JSON.parse('{{ numbers | tojson | safe}}');
+            const yValues = JSON.parse('{{ distribution_numbers | tojson | safe }}');
+            const barColors = JSON.parse('{{ bar_colors | tojson | safe }}');
+
+            new Chart("distributionChart",{
+                type: "bar",
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        backgroundColor: barColors,
+                        data: yValues
+                    }]
+                },
+                options: {
+                    legend: {display: false},
+                    title: {display: false},
+                    scales: {
+                        xAxes: [{
+                            gridLines: {display: false},
+                            ticks: {display: false}
+                        }],
+                        yAxes: [{
+                            gridLines: {display: false},
+                            ticks: {display: false}
+                        }]
+                    },
+                    tooltips: {enabled: false}
+                }
+            });
+        </script>
+    </div>
+    <div class="text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="700" height="25" onload="makeDraggable(evt)">
+            // Add rectangle
+            <rect width="700" height="25" fill="grey" opacity="0.25" id="rectslider" style="cursor: copy;"></rect>
+            // Add circles on the rectangle
+            {% for data in circle_colors %}
+                <circle data-stance="{{ data[0] }}" class="candidate draggable" cx="{{ 350*(data[0]+1) }}" cy="12.5" r="6" fill="{{ data[1] }}" stroke="black"></circle>
+            {% endfor %}
+            // Script for adding and deleting candidates, adds input field and fills in with values
+            <script>
+                const del_candidates = document.querySelectorAll(".candidate");
+                del_candidates.forEach(candidate => {
+                    candidate.addEventListener("click", () => {
+                        var deleteInput = document.createElement("input");
+                        deleteInput.type = 'hidden';
+                        deleteInput.name = 'delete_marked';
+                        deleteInput.value = candidate.getAttribute('data-stance');
+                        document.getElementById("candidate_click_deletion").appendChild(deleteInput);
+                        document.getElementById("candidate_click_deletion").submit();
+                    });
+                });
+            </script>
+            <script>
+                const rectslider = document.getElementById("rectslider");
+                rectslider.addEventListener("click", function(event) {
+                    const element = event.target;
+                    const rect = element.getBoundingClientRect();
+                    const x = event.clientX - rect.left;
+                    var addInput = document.createElement("input");
+                    addInput.type = 'number';
+                    addInput.name = 'candidate_stance';
+                    addInput.max = '1'
+                    addInput.min = '-1'
+                    addInput.step = 'any'
+                    addInput.style = 'display: none;'
+                    addInput.value = (x/350)-1;
+                    document.getElementById("candidate_click_addition").appendChild(addInput);
+                    document.getElementById("candidate_click_addition").submit()
+                });
+            </script>
+        </svg>
+        <form id="candidate_click_deletion" action="/" method="post">
+            <input type="hidden" name="action" value="delete_candidates">
+        </form>
+        <form id="candidate_click_addition" action="/" method="post">
+            <input type="hidden" name="action" value="add_candidate">
+        </form>
+    </div>
+    <div class="flex-container tag">
+        <form action="/", method="post">
+            <input type="hidden" name="action" value="run_simulation">
+            <button class="btn btn-primary centered-button" type="submit">Run Simulation</button>
+        </form>
+    </div>
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+{% endblock %}

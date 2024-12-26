@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Tideman Vote
+{% endblock %}
+
+{% block script %}
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.7.10/cytoscape.js">
+    </script>
+{% endblock %}
+
+{% block main %}
+    <h1 class="my-3 text-center">Tideman Vote</h1>
+    <div class="my-3 text-center">
+        <p>
+            Below, you can see which candidates defeated which other candidates. <br>
+            Hit the button below to proceed to the next simulation. <br>
+            If a candidate A points to candidate B, A lost to B. Winner is in gold.
+        </p>
+    </div>
+    <div class="flex-container">
+        <form action="/tideman", method="post">
+            <button class="btn btn-primary centered-button" type="submit">Proceed</button>
+        </form>
+    </div>
+    <div id="cy">
+        <script>
+            var nodeList = JSON.parse('{{ node_list | tojson | safe }}');
+            var edgeList = JSON.parse('{{ edge_list | tojson | safe }}');
+            var styleList = JSON.parse('{{ style_list | tojson | safe }}');
+            var cy = cytoscape({
+                container: document.getElementById('cy'), // container to render in
+                elements: {
+                    nodes: nodeList,
+                    edges: edgeList
+                },
+                style: styleList, 
+                layout: {
+                    name: 'breadthfirst',
+                    directed: true,
+                    padding: 10
+                },
+                userZoomingEnabled: true
+            });
+        </script>    
+    </div>
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+{% endblock %}
