@@ -465,7 +465,7 @@ def summary():
         return apology("403: Invalid form submission.", 403)
     else:
         return redirect("/save")
-
+'''
 @app.route("/save", methods=["GET", "POST"])
 @login_required
 def save():
@@ -501,7 +501,8 @@ def save():
         )
     
     return redirect("/")
-
+'''
+'''
 @app.route("/simulations")
 @login_required
 def simulations():
@@ -530,7 +531,8 @@ def simulations():
             cards.append({"title": simulation.distribution_type.replace("_"," ").title(), "content": card_content}) # Formats title of card
 
         return render_template("simulations.html", simulation_dict=simulation_dict, cards=cards)
-
+'''
+'''
 @app.route("/logout")
 def logout():
     """Log user out"""
@@ -540,7 +542,9 @@ def logout():
 
     # Redirect user to login form
     return redirect("/")
+'''
 
+'''
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
@@ -581,7 +585,9 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
-    
+'''
+
+'''
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
@@ -627,6 +633,7 @@ def register():
     session["user_id"] = user_extraction.id
 
     return redirect("/")
+'''
 
 def main():
     app.run()

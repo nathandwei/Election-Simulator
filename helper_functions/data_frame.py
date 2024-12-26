@@ -1,18 +1,5 @@
 # importing things
-
-import samples
-import data_structures
 from collections import defaultdict
-
-# Every function in here is a function that the user can call/influence
-# User Input -> outputing stuff to use
-
-# Default candidates datastructure
-# politicians = data_structures.DoublyLinkedList()
-# politicians.prepend(0.6)
-# politicians.prepend(0.2)
-# politicians.prepend(-0.2)
-# politicians.prepend(-0.6)
 
 """
     Popular vote
@@ -122,59 +109,6 @@ def ranked_choice_voting(distribution, politicians):
             return dataset
 
         round_number += 1
-
-"""
-    Two-round voting
-
-def two_round_voting(distribution):
-    # Generate ranked preferences
-    preferences = generate_ranked_preferences(distribution)
-
-    # Initialize vote counts for the first round
-    vote_counts = defaultdict(int)
-    for pref in preferences:
-        vote_counts[pref[0]] += 1  # Count the first choice of each voter
-
-    # Total number of votes
-    total_votes = len(preferences)
-
-    # Dataset to store results of each round
-    dataset = []
-    round_number = 0
-
-    # First Round
-    round_data = {"round": round_number, "vote_counts": dict(vote_counts)}
-    dataset.append(round_data)
-
-    # Check if any candidate has more than 50% of the votes in the first round
-    for candidate, votes in vote_counts.items():
-        if votes > total_votes / 2:
-            return dataset
-
-    # Identify the top two candidates
-    sorted_candidates = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True)
-    top_two_candidates = [sorted_candidates[0][0], sorted_candidates[1][0]]
-
-    # Reset vote counts for the second round
-    vote_counts = {candidate: 0 for candidate in top_two_candidates}
-
-    # Second Round
-    round_number += 1
-    for pref in preferences:
-        # Assign votes to the highest-ranked remaining candidate in the top two
-        for candidate in pref:
-            if candidate in top_two_candidates:
-                vote_counts[candidate] += 1
-                break
-
-    # Record second round results
-    round_data = {"round": round_number, "vote_counts": dict(vote_counts)}
-    dataset.append(round_data)
-
-    # Determine the winner in the second round
-    winner = max(vote_counts, key=vote_counts.get)
-    return dataset
-"""
 
 """
     Ranked-Pairs/Tideman

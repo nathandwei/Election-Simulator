@@ -69,25 +69,8 @@ Summary
    </div>
 </div>
 <div class="my-3 text-center">
-   {% if not saved %}
    <p>
-      Click below to save this simulation. You must be logged in to do this.<br>
-   </p>
-   <div class="flex-container">
-      <form action="/summary" method="post"> 
-         <input type="hidden" name="action" value="save">
-         <button class="btn btn-primary centered-button" type="submit">Save</button>
-      </form>
-   </div>
-   {% else %}
-   <p>
-      Simulation saved successfully!
-   </p>
-   {% endif %}
-</div>
-<div class="my-3 text-center">
-   <p>
-      Alternatively, head back to the homepage and start a new simulation.<br>
+      Head back to the homepage and start a new simulation.<br>
    </p>
    <div class="flex-container">
       <form action="/summary" method="post"> 
@@ -102,27 +85,3 @@ Summary
    <div class="wave"></div>
 </div>
 {% endblock %}
-
-
-
-
-
-<!-- {% if simulate_mode == "simulate_100" or simulate_mode == "simulate_n" %}
-   <div class="my-3 text-center">
-       <p>
-           Here is a summary of the win counts for simulating {{ n }} times.<br>
-           <br>
-           Ranked-Choice Vote: <br>
-           <br>
-           {% for candidate, wins in ranked_win_count.items() %}
-               Candidate <b>{{ candidate }}</b> won <b>{{ wins }}</b> simulations.<br>
-           {% endfor %}
-           <br>
-           Tideman Vote:<br>
-           <br>
-           {% for candidate, wins in tideman_win_count.items() %}
-               Candidate <b>{{ candidate }}</b> won <b>{{ wins }}</b> simulations.<br>
-           {% endfor %}
-       </p>
-   </div>
-   {% endif %} -->
