@@ -1,5 +1,5 @@
-# cs50-final-project
-CS50 Final Project: Sam Huang and Nathan Wei on election simulations.
+# Election Simulation Project
+Sam Huang and Nathan Wei on election simulations.
 
 **Link to project:** https://nathanwei.pythonanywhere.com/
 
@@ -30,14 +30,6 @@ Ranked-Choice voting consists of multiple rounds, so instead of just having one 
 Tideman voting is completely different, and there's no good way to represent it with bar graphs. To this end, we used Cytoscape.js, a Javascript framework that can draw graph-theory-like structures. This perfectly suited our purpose to provide an intuitive visual of which candidates beat which other candidates. Our visual is a direct graph, and each candidate is visually represented as a node, pointing to anyone who beat it. The winner is again highlighted in gold using CSS to allow the user to easily see the winner.
 
 At the end, there is a summary page: this might not seem necessary, but we decided it was good for the user to be able to see all the data from each type of algorithm on one page, so they can compare and contrast the different methods. We used HTML tables, with CSS to style them.
-
-**Saving Simulations:** If a user really likes a certain simulation and thinks it will be useful, they can save the simulation, allowing them to see their old simulations anytime they want. Of course, the user must first be logged in to save a simulation, otherwise we couldn't associate a simulation with them. SQL is the perfect tool for this, so we used the SQLAlchemy and Flask-SQLAlchemy python modules to implement a SQLite database: Flask-SQLAlchemy better integrates SQLAlchemy with Flask by associating a Flask app to a specified SQL database. The structure of the tables is a one-to-many relationship from users to simulations, and a many-to-many relationship from simulations to candidates,: this is because each user has many simulations, and each simulation has many candidates, but users cannot share simulations, so the relationship from users to simulations is one-to-many. For logging in and registering, we used flask's werkzeug password hash function to store passwords in a secure manner, instead of using plaintext.
-
-For the page where they can view their saved simulations, we believed that having each simulation in its own separate area would be much cleaner and easier on the eyes than raw text. Thus, each simulation is enclosed in it's own "card", with an image showing what type of distribution was used and what political stances each candidate had. 
-
-**Miscellaneous Visuals:** The following were mostly implemented with plain CSS. For the default background, we aimed for a color that would contrast well with the distribution and simulation graphs, so we went with a light grey, a gentle color that's easy on the eyes and contrasts with the stronger colors of the candidates. We also added some waves at the bottom for a bit of stylistic flair. There is also a button at the top, the "Brilliant Mode" toggle that adds a CSS property called "brilliant" to the body HTML of any page, creating a multicolored animated background, because it seemed cool. 
-
-For font, we wanted a sans-serif font that was easier on the eyes. However, many browsers cannot display some fonts. Trebuchet MS is considered more of a CSS-safe font, so it is widely browser compatible, which is why we used it.
 
 **Other Development Details:** One thing that was very important to us when programming was adaptability. This is why popular.html and ranked.html are very similar: they both display a bar graph. The only difference is that the way the data is structured is slightly different, so they have to be different html pages, but the data fed into the pages are manipulated by Python beforehand, so any large changes to how the data is treated are isolated purely within app.py, and the display will adapt automatically. Another example of this philosophy is within app.py: many global constants are initialized at the top so that they can be readily used, and global variables are stored in the Flask session so that they can be easily used whenever needed. We also prefer to use session.get() instead of directly querying the session in case the field doesn't actually exist, for added security.
 
