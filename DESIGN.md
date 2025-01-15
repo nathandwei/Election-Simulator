@@ -1,7 +1,7 @@
 # Election Simulation Project
 Sam Huang and Nathan Wei on election simulations.
 
-**Link to project:** https://nathanwei.pythonanywhere.com/
+**Link to project:** https://www.nwei.me/
 
 ![Alt text](static/ReadMe.png?raw=true)
 
