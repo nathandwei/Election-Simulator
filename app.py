@@ -280,6 +280,7 @@ def popular():
         bar_outlines = []
         for candidate,color in zip(list(candidate_dict.keys()),bar_colors):
             if candidate.name == winner:
+                session["popular_winner"] = candidate
                 bar_outlines.append('rgba(255, 215, 0, 1)') # HTML RGB color for gold, outline winner in gold
             else:
                 bar_outlines.append(hex_to_rgb(color,0.5)) # Outline non-winners in lighter version of bar color
@@ -322,6 +323,7 @@ def ranked():
             if candidate_dict[candidate] > max_num:
                 max_num = candidate_dict[candidate]
                 winner = candidate.name
+                session["ranked_winner"] = candidate
         bar_outlines = []
         for candidate,color in zip(list(candidate_dict.keys()),bar_colors):
             if candidate.name == winner:
@@ -359,6 +361,7 @@ def ranked():
             if candidate_dict[candidate] > max_num:
                 max_num = candidate_dict[candidate]
                 winner = candidate.name
+                session["ranked_winner"] = candidate
         bar_outlines = []
         for candidate,color in zip(list(candidate_dict.keys()),bar_colors):
             if candidate.name == winner:
@@ -424,6 +427,7 @@ def tideman():
                 win_dict = {"data": {"source": win.name, "target": candidate.name}} 
                 edge_list.append(win_dict) # Append edge to list of nodes in Cytoscape.js
             if len(candidate_win_dict[0][candidate]) == num_candidates-1:
+                session["tideman_winner"] = candidate
                 winner = candidate.name # Algorithm for detecting who has the max wins
 
         style_list.append({ # Apply special style to the winner
@@ -448,16 +452,17 @@ def tideman():
 @app.route("/summary", methods=["GET", "POST"])
 def summary(): 
     if request.method == "GET":
-        popular_dict = session["popular"] # Get all data from all simulations
-        ranked_dict_list = session["ranked"]
-        tideman_win_dict = session["tideman"][0]
+        tideman_winner = session["tideman_winner"]
+        ranked_winner = session["ranked_winner"]
+        popular_winner = session["popular_winner"]
         return render_template(
             "summary.html",
-            candidate_dict=popular_dict,
-            ranked_dict_list=ranked_dict_list,
-            tideman_win_dict=tideman_win_dict,
+            popular=popular_winner,
+            ranked=ranked_winner,
+            tideman=tideman_winner,
             saved=False
         )
+    
     
     if request.form.get("action") == "homepage":
         return redirect("/")
