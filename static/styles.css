@@ -39,10 +39,24 @@ canvas {
 }
 
 .flex-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 10vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 50px;
+    width: 100%;
+    z-index: 10;
+    padding: 10px;
+}
+
+.button-container {
+    position: fixed;
+    bottom: 100px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+    padding: 10px 0;
 }
 
 .centered-button {

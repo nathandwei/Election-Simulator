@@ -22,10 +22,11 @@
         </p>
     </div>
     <div class="flex-container">
-        <form action="/tideman", method="post">
+        <form action="/tideman" method="post">
             <button class="btn btn-primary centered-button" type="submit">Proceed</button>
         </form>
     </div>
+
     <div id="cy">
         <script>
             var nodeList = JSON.parse('{{ node_list | tojson | safe }}');
