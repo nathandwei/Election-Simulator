@@ -400,10 +400,11 @@ def tideman():
         style_list.append({ # Append generic style for each node in JSON-like format
             'selector': 'node',
             'style': {
-                'label': 'data(id)',
+                'label': 'data(name)',
                 'border-color': '#000',
                 'border-width': 3,
-                'border-opacity': 0.5
+                'border-opacity': 0.5,
+                'background-color': 'data(color)'
             },
         })
         style_list.append({ # Apply generic style for each edge in JSON-like format
@@ -417,25 +418,33 @@ def tideman():
             }
         })
 
-        for candidate in candidate_dict.keys():
-            cand_dict = {"data": {"id": candidate.name}} 
-            node_list.append(cand_dict) # Append node to list of nodes in Cytoscape.js
-            style_list.append({"selector": "#"+candidate.name, "style": {"background-color": str(candidate.color)}}) # Append node-specific style
-            num_candidates += 1
+        id = lambda candidate : candidate.name+"_"+str(candidate.data)
+        num_candidates = len(candidate_dict.keys())
+
         for candidate in candidate_win_dict[0].keys():
             for win in candidate_win_dict[0][candidate]: # Determine who has the most wins as the winner
-                win_dict = {"data": {"source": win.name, "target": candidate.name}} 
+                win_dict = {"data": {"source": id(win), "target": id(candidate)}} 
                 edge_list.append(win_dict) # Append edge to list of nodes in Cytoscape.js
             if len(candidate_win_dict[0][candidate]) == num_candidates-1:
                 session["tideman_winner"] = candidate
                 winner = candidate.name # Algorithm for detecting who has the max wins
+                winner_id = id(candidate)
+        for candidate in candidate_dict.keys():
+            if id(candidate) == winner_id:
+                cand_dict = {"data": {"id": id(candidate), "name": candidate.name, "color": candidate.color, "winner": 'true'}} 
+            else:
+                cand_dict = {"data": {"id": id(candidate), "name": candidate.name, "color": candidate.color, "winner": 'false'}} 
+            node_list.append(cand_dict) # Append node to list of nodes in Cytoscape.js
+            # style_list.append({"selector": "#"+candidate.name, "style": {"background-color": str(candidate.color)}}) # Append node-specific style
 
         style_list.append({ # Apply special style to the winner
-            'selector': f'#{winner}',
+            'selector': "node[winner = 'true']",
             'style': {
                 'border-color': 'gold'
             }
         })
+
+        print(winner)
         
         return render_template(
             "tideman.html",
