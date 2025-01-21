@@ -16,6 +16,7 @@ class Node:
         self.name = self._generate_unique_name()
         self.prev = None
         self.next = None
+        self.political = None
 
     def _generate_unique_color(self):
         color = random.choice(list(CSS4_COLORS.values()))

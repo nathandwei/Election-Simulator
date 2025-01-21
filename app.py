@@ -23,6 +23,7 @@ from helper_functions import data_frame, samples, data_structures
 class Base(DeclarativeBase):
     pass
 
+
 db = SQLAlchemy(model_class=Base)
 
 app = Flask(__name__)
@@ -33,7 +34,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///simulator.db"
 db.init_app(app)
 
 # Construct SQL Tables
-class User(db.Model): # user id, username, and password hash
+class User(db.Model):  # user id, username, and password hash
     id = mapped_column(Integer, primary_key=True)
     username = mapped_column(String(30), nullable=False, unique=True)
     hash = mapped_column(String, nullable=False)
@@ -41,7 +42,10 @@ class User(db.Model): # user id, username, and password hash
     def __repr__(self):
         return f"User(id={self.id!r}, username={self.username!r}, hash={self.hash!r})"
 
-class SavedSimulation(db.Model): # simulation id, id of user who created it, distribution type
+
+class SavedSimulation(
+    db.Model
+):  # simulation id, id of user who created it, distribution type
     id = mapped_column(Integer, primary_key=True)
     user_id = mapped_column(ForeignKey("user.id"))
     distribution_type = mapped_column(String, nullable=False)
@@ -49,7 +53,10 @@ class SavedSimulation(db.Model): # simulation id, id of user who created it, dis
     def __repr__(self):
         return f"SavedSimulation(id={self.id!r}, user_id={self.user_id!r}, distribution_type={self.distribution_type!r})"
 
-class SimulationCandidate(db.Model): # id of candidate, id of simulation it belongs to, name, political stance
+
+class SimulationCandidate(
+    db.Model
+):  # id of candidate, id of simulation it belongs to, name, political stance
     id = mapped_column(Integer, primary_key=True)
     simulation_id = mapped_column(ForeignKey("saved_simulation.id"))
     name = mapped_column(String, nullable=True)
@@ -57,45 +64,49 @@ class SimulationCandidate(db.Model): # id of candidate, id of simulation it belo
 
     def __repr__(self):
         return f"SimulationCandidate(id={self.id!r}, simulation_id={self.simulation_id!r}, name={self.name!r}, political_stance={self.political_stance!r})"
-    
+
+
 with app.app_context():
-    db.create_all() # Create the tables or update them
+    db.create_all()  # Create the tables or update them
 
 # Global variables
-red = (252,70,107) # RGB
-blue = (63,94,251)
-type_to_dist = { # Converts distribution type to distribution sample data
-    'normal': samples.normal(), 
-    'bimodal': samples.two_peaks(), 
-    'uniform': samples.uniform(), 
-    'skewed_left': samples.skewed_left(), 
-    'skewed_right': samples.skewed_right()
+red = (252, 70, 107)  # RGB
+blue = (63, 94, 251)
+type_to_dist = {  # Converts distribution type to distribution sample data
+    "normal": samples.normal(),
+    "bimodal": samples.two_peaks(),
+    "uniform": samples.uniform(),
+    "skewed_left": samples.skewed_left(),
+    "skewed_right": samples.skewed_right(),
 }
 
 # Minor functions
 
 # Takes in two RGB tuples and weight (0 to 1) of color 1, and outputs a weighted average in str format for Chart.js
 def color_average(c1, c2, w):
-    new_red = sqrt((c1[0]**2)*w + (c2[0]**2)*(1-w))
-    new_green = sqrt((c1[1]**2)*w + (c2[1]**2)*(1-w))
-    new_blue = sqrt((c1[2]**2)*w + (c2[2]**2)*(1-w))
+    new_red = sqrt((c1[0] ** 2) * w + (c2[0] ** 2) * (1 - w))
+    new_green = sqrt((c1[1] ** 2) * w + (c2[1] ** 2) * (1 - w))
+    new_blue = sqrt((c1[2] ** 2) * w + (c2[2] ** 2) * (1 - w))
     new_color = f"rgba({new_red},{new_green},{new_blue},1)"
     return new_color
+
 
 # Converts a hex value parseable by HTML to an RGBA value parseable by HTML
 def hex_to_rgb(hex_code, opacity):
     # Remove the '#' if it's there
-    hex_code = hex_code.lstrip('#')
+    hex_code = hex_code.lstrip("#")
     # Convert the hex code to RGB
-    build = "rgba"+str(tuple(int(hex_code[i:i+2], 16) for i in (0, 2, 4)))
-    build = build[:-1]+f", {str(opacity)})"
+    build = "rgba" + str(tuple(int(hex_code[i : i + 2], 16) for i in (0, 2, 4)))
+    build = build[:-1] + f", {str(opacity)})"
     return build
+
 
 # Displays a screen showing an error message in case something goes wrong
 def apology(message, code=400):
     """Render message as an apology to user."""
 
     return render_template("apology.html", error_message=message, error_code=code), code
+
 
 # A decorator function verifying that the user has logged in
 def login_required(f):
@@ -113,42 +124,60 @@ def login_required(f):
 
     return decorated_function
 
+
 # HTML page code
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if not session.get("candidate_list"): # If this is the first time entering the website
+    if not session.get(
+        "candidate_list"
+    ):  # If this is the first time entering the website
         politicians = data_structures.DoublyLinkedList()
         politicians.prepend(0.6)
         politicians.prepend(0.2)
         politicians.prepend(-0.2)
         politicians.prepend(-0.6)
         session["candidate_list"] = politicians
-    
+
     numbers = [i for i in range(101)]
-    bar_colors = [color_average(red,blue,value/100) for value in range(101)] # Sets up bar colors for distribution visuals
+    bar_colors = [
+        color_average(red, blue, value / 100) for value in range(101)
+    ]  # Sets up bar colors for distribution visuals
     candidate_list = session["candidate_list"]
-    circle_colors = [tuple((candidate.data, candidate.color)) for candidate in candidate_list] # Sets up circle colors for candidate visuals
-    session["ranked_visited"] = False # If the user is at index.html, they have not entered the ranked.html page for a new simulation yet
-    if not session.get("distribution_type"): # If no distribution type chosen, set it to normal
-        session["distribution_type"] = 'normal'
+    circle_colors = [
+        tuple((candidate.data, candidate.color)) for candidate in candidate_list
+    ]  # Sets up circle colors for candidate visuals
+    session[
+        "ranked_visited"
+    ] = False  # If the user is at index.html, they have not entered the ranked.html page for a new simulation yet
+    if not session.get(
+        "distribution_type"
+    ):  # If no distribution type chosen, set it to normal
+        session["distribution_type"] = "normal"
     distribution_type = session["distribution_type"]
 
-    type_to_numbers = { # Convert type of distribution to numbers for display on index.html distribution graph
-        'normal': [norm(0,1).pdf(7*i/100) for i in range(-50,51)],
-        'bimodal': [(0.5)*(norm(2,1).pdf(7*i/100)+norm(-2,1).pdf(7*i/100)) for i in range(-50,51)],
-        'uniform': [uniform(-1,1).pdf(i/100) for i in range(-101,0)],
-        'skewed_left': [beta(2,4).pdf(i/100) for i in range(101)],
-        'skewed_right': [beta(4,2).pdf(i/100) for i in range(101)]
+    type_to_numbers = {  # Convert type of distribution to numbers for display on index.html distribution graph
+        "normal": [norm(0, 1).pdf(7 * i / 100) for i in range(-50, 51)],
+        "bimodal": [
+            (0.5) * (norm(2, 1).pdf(7 * i / 100) + norm(-2, 1).pdf(7 * i / 100))
+            for i in range(-50, 51)
+        ],
+        "uniform": [uniform(-1, 1).pdf(i / 100) for i in range(-101, 0)],
+        "skewed_left": [beta(2, 4).pdf(i / 100) for i in range(101)],
+        "skewed_right": [beta(4, 2).pdf(i / 100) for i in range(101)],
     }
 
-    distribution_order = {} # Decides what order the dropdown menu from the Choose Distribution button is, starting with the one already chosen
-    distribution_order[distribution_type] = distribution_type.replace("_"," ").title()
+    distribution_order = (
+        {}
+    )  # Decides what order the dropdown menu from the Choose Distribution button is, starting with the one already chosen
+    distribution_order[distribution_type] = distribution_type.replace("_", " ").title()
     for i in type_to_numbers.keys():
         if i != distribution_type:
-            distribution_order[i] = i.replace("_"," ").title() # Formats the text
+            distribution_order[i] = i.replace("_", " ").title()  # Formats the text
 
     if request.method == "GET":
-        distribution_numbers = type_to_numbers[session["distribution_type"]] # Default is normal       
+        distribution_numbers = type_to_numbers[
+            session["distribution_type"]
+        ]  # Default is normal
         return render_template(
             "index.html",
             numbers=numbers,
@@ -157,28 +186,36 @@ def index():
             distribution_type=session["distribution_type"],
             candidate_list=candidate_list,
             circle_colors=circle_colors,
-            distribution_order=distribution_order
+            distribution_order=distribution_order,
         )
-    
+
     if request.form.get("action") == "run_simulation":
         return redirect("/popular")
-    elif request.form.get("action") == "choose_distribution": 
+    elif request.form.get("action") == "choose_distribution":
         distribution_type = request.form.get("distribution_type")
-        valid_types = ['normal','bimodal','uniform','skewed_left','skewed_right']
-        if distribution_type not in valid_types: # Make sure the type is valid
+        valid_types = ["normal", "bimodal", "uniform", "skewed_left", "skewed_right"]
+        if distribution_type not in valid_types:  # Make sure the type is valid
             return apology("Invalid distribution type.", 403)
         else:
-            session["distribution_type"] = distribution_type # Set session variables
+            session["distribution_type"] = distribution_type  # Set session variables
             distribution_numbers = type_to_numbers[distribution_type]
-            session["distribution_numbers"] = distribution_numbers # Distribution numbers for display on page
+            session[
+                "distribution_numbers"
+            ] = distribution_numbers  # Distribution numbers for display on page
 
-        circle_colors = [tuple((candidate.data, candidate.color)) for candidate in candidate_list] # Colors of candidates
+        circle_colors = [
+            tuple((candidate.data, candidate.color)) for candidate in candidate_list
+        ]  # Colors of candidates
 
-        distribution_order = {} # This code MUST be repeated for this action specifically since distribution changes
-        distribution_order[distribution_type] = distribution_type.replace("_"," ").title()
+        distribution_order = (
+            {}
+        )  # This code MUST be repeated for this action specifically since distribution changes
+        distribution_order[distribution_type] = distribution_type.replace(
+            "_", " "
+        ).title()
         for i in type_to_numbers.keys():
             if i != distribution_type:
-                distribution_order[i] = i.replace("_"," ").title()
+                distribution_order[i] = i.replace("_", " ").title()
 
         return render_template(
             "index.html",
@@ -188,10 +225,12 @@ def index():
             distribution_type=distribution_type,
             candidate_list=candidate_list,
             circle_colors=circle_colors,
-            distribution_order=distribution_order
+            distribution_order=distribution_order,
         )
     elif request.form.get("action") == "add_candidate":
-        if not request.form.get("candidate_stance"): # Verify that the candidate stance is valid, if user accesses hidden inputs not displayed
+        if not request.form.get(
+            "candidate_stance"
+        ):  # Verify that the candidate stance is valid, if user accesses hidden inputs not displayed
             return apology("Must input a candidate stance.", 403)
         candidate_stance = request.form.get("candidate_stance")
 
@@ -201,17 +240,21 @@ def index():
             return apology("Candidate stance must be a number.", 403)
         if 1 < candidate_stance or -1 > candidate_stance:
             return apology("Candidate stance must be between 1 and -1.")
-        
-        data_frame.add_candidate(candidate_stance, session["candidate_list"]) # Add the candidate
+
+        data_frame.add_candidate(
+            candidate_stance, session["candidate_list"]
+        )  # Add the candidate
 
         distribution_type = session.get("distribution_type")
         distribution_numbers = session.get("distribution_numbers")
-        if not distribution_type: # Set defaults
-            distribution_type = 'normal'
+        if not distribution_type:  # Set defaults
+            distribution_type = "normal"
         if not distribution_numbers:
-            distribution_numbers = [norm(0,1).pdf(7*i/100) for i in range(-50,51)]
+            distribution_numbers = [norm(0, 1).pdf(7 * i / 100) for i in range(-50, 51)]
 
-        circle_colors = [tuple((candidate.data, candidate.color)) for candidate in candidate_list]
+        circle_colors = [
+            tuple((candidate.data, candidate.color)) for candidate in candidate_list
+        ]
 
         return render_template(
             "index.html",
@@ -221,25 +264,29 @@ def index():
             distribution_type=distribution_type,
             candidate_list=candidate_list,
             circle_colors=circle_colors,
-            distribution_order=distribution_order
+            distribution_order=distribution_order,
         )
     elif request.form.get("action") == "delete_candidates":
-        if not request.form.getlist("delete_marked"): # Delete all candidates marked for deletion, list in case multiple (future feature)
+        if not request.form.getlist(
+            "delete_marked"
+        ):  # Delete all candidates marked for deletion, list in case multiple (future feature)
             return apology("Must check off candidates to delete.", 403)
-        
+
         delete_marked = request.form.getlist("delete_marked")
         for candidate in delete_marked:
             data_frame.remove_candidate(float(candidate), session["candidate_list"])
-        
+
         distribution_type = session.get("distribution_type")
         distribution_numbers = session.get("distribution_numbers")
         if not distribution_type:
-            distribution_type = 'normal'
+            distribution_type = "normal"
         if not distribution_numbers:
-            distribution_numbers = [norm(0,1).pdf(7*i/100) for i in range(-50,51)]
+            distribution_numbers = [norm(0, 1).pdf(7 * i / 100) for i in range(-50, 51)]
 
-        circle_colors = [tuple((candidate.data, candidate.color)) for candidate in candidate_list]
-        
+        circle_colors = [
+            tuple((candidate.data, candidate.color)) for candidate in candidate_list
+        ]
+
         return render_template(
             "index.html",
             numbers=numbers,
@@ -248,7 +295,7 @@ def index():
             distribution_type=distribution_type,
             candidate_list=candidate_list,
             circle_colors=circle_colors,
-            distribution_order=distribution_order
+            distribution_order=distribution_order,
         )
     else:
         return apology("Invalid action.", 403)
@@ -258,78 +305,109 @@ def index():
 def popular():
     if request.method == "GET":
         distribution_type = session.get("distribution_type")
-        if not distribution_type: # Set default
-            distribution_type = 'normal'
+        if not distribution_type:  # Set default
+            distribution_type = "normal"
         distribution = type_to_dist[distribution_type]
 
         try:
-            candidate_dict = OrderedDict(sorted(data_frame.popular_vote(distribution, session["candidate_list"]).items(), key=lambda x: x[0].data)) # Create ordered dict by stance
+            candidate_dict = OrderedDict(
+                sorted(
+                    data_frame.popular_vote(
+                        distribution, session["candidate_list"]
+                    ).items(),
+                    key=lambda x: x[0].data,
+                )
+            )  # Create ordered dict by stance
         except ValueError:
-            return apology("Must have at least one candidate.", 403) # Verify there is at least one candidate
-        
+            return apology(
+                "Must have at least one candidate.", 403
+            )  # Verify there is at least one candidate
+
         session["popular"] = candidate_dict
         max_num = -1
         winner = "NOT AVAILABLE"
-        for candidate in candidate_dict: # Algorithm to detect the winner (most votes)
+        for candidate in candidate_dict:  # Algorithm to detect the winner (most votes)
             if candidate_dict[candidate] > max_num:
                 max_num = candidate_dict[candidate]
                 winner = candidate.name
-        candidates = [x.name for x in list(candidate_dict.keys())] # I can't just use candidate_dict dictionary as Jinja does not allow for list() in HTML
+        candidates = [
+            x.name for x in list(candidate_dict.keys())
+        ]  # I can't just use candidate_dict dictionary as Jinja does not allow for list() in HTML
         vote_numbers = list(candidate_dict.values())
-        bar_colors = [str(x.color) for x in list(candidate_dict.keys())] # Bar colors are colors of the nodes
+        bar_colors = [
+            str(x.color) for x in list(candidate_dict.keys())
+        ]  # Bar colors are colors of the nodes
         bar_outlines = []
-        for candidate,color in zip(list(candidate_dict.keys()),bar_colors):
+        for candidate, color in zip(list(candidate_dict.keys()), bar_colors):
             if candidate.name == winner:
                 session["popular_winner"] = candidate
-                bar_outlines.append('rgba(255, 215, 0, 1)') # HTML RGB color for gold, outline winner in gold
+                bar_outlines.append(
+                    "rgba(255, 215, 0, 1)"
+                )  # HTML RGB color for gold, outline winner in gold
             else:
-                bar_outlines.append(hex_to_rgb(color,0.5)) # Outline non-winners in lighter version of bar color
-        return render_template( 
+                bar_outlines.append(
+                    hex_to_rgb(color, 0.5)
+                )  # Outline non-winners in lighter version of bar color
+        return render_template(
             "popular.html",
-            candidates=candidates, 
+            candidates=candidates,
             vote_numbers=vote_numbers,
             bar_colors=bar_colors,
             bar_outlines=bar_outlines,
         )
-    
+
     return redirect("/ranked")
+
 
 @app.route("/ranked", methods=["GET", "POST"])
 def ranked():
-    if not session.get("ranked_visited"): # If ranked.html has not been visited before for this simulation
+    if not session.get(
+        "ranked_visited"
+    ):  # If ranked.html has not been visited before for this simulation
         session["ranked_round"] = 0
         session["ranked_visited"] = True
 
         distribution_type = session.get("distribution_type")
         if not distribution_type:
-            distribution_type = 'normal'
+            distribution_type = "normal"
         distribution = type_to_dist[distribution_type]
-        candidate_round_list = data_frame.ranked_choice_voting(distribution, session["candidate_list"]) # Generate the ranked choice voting results from distribution
+        candidate_round_list = data_frame.ranked_choice_voting(
+            distribution, session["candidate_list"]
+        )  # Generate the ranked choice voting results from distribution
 
-        session["ranked"] = candidate_round_list # Save data for ranked choice voting
+        session["ranked"] = candidate_round_list  # Save data for ranked choice voting
     else:
-        candidate_round_list = session["ranked"] # Get the data from before
+        candidate_round_list = session["ranked"]  # Get the data from before
     num_rounds = len(candidate_round_list)
 
     if request.method == "GET":
-        round = 0 # Get method implies it's the first round, 0-indexed here but adds 1 in ranked.html for display
-        candidate_dict = OrderedDict(sorted(candidate_round_list[round]['vote_counts'].items(), key=lambda x: x[0].data)) # Dict of votes for each cand each round
+        round = 0  # Get method implies it's the first round, 0-indexed here but adds 1 in ranked.html for display
+        candidate_dict = OrderedDict(
+            sorted(
+                candidate_round_list[round]["vote_counts"].items(),
+                key=lambda x: x[0].data,
+            )
+        )  # Dict of votes for each cand each round
         candidates = [x.name for x in list(candidate_dict.keys())]
         vote_numbers = list(candidate_dict.values())
         bar_colors = [str(x.color) for x in list(candidate_dict.keys())]
         max_num = -1
         winner = "NOT AVAILABLE"
-        for candidate in candidate_dict: # Algorithm to detect the winner (most votes)
+        for candidate in candidate_dict:  # Algorithm to detect the winner (most votes)
             if candidate_dict[candidate] > max_num:
                 max_num = candidate_dict[candidate]
                 winner = candidate.name
                 session["ranked_winner"] = candidate
         bar_outlines = []
-        for candidate,color in zip(list(candidate_dict.keys()),bar_colors):
+        for candidate, color in zip(list(candidate_dict.keys()), bar_colors):
             if candidate.name == winner:
-                bar_outlines.append('rgba(255, 215, 0, 1)') # HTML RGB color for gold, outline winner in gold
+                bar_outlines.append(
+                    "rgba(255, 215, 0, 1)"
+                )  # HTML RGB color for gold, outline winner in gold
             else:
-                bar_outlines.append(hex_to_rgb(color,0.5)) # Outline non-winners in lighter version of bar color
+                bar_outlines.append(
+                    hex_to_rgb(color, 0.5)
+                )  # Outline non-winners in lighter version of bar color
 
         return render_template(
             "ranked.html",
@@ -346,28 +424,39 @@ def ranked():
     elif request.form.get("action") == "proceed":
         return redirect("/tideman")
     elif request.form.get("action") == "next_round":
-        if session["ranked_round"] == num_rounds-1: # Increase the number of rounds mod total number of rounds
+        if (
+            session["ranked_round"] == num_rounds - 1
+        ):  # Increase the number of rounds mod total number of rounds
             session["ranked_round"] = 0
         else:
             session["ranked_round"] += 1
-        round = session["ranked_round"] # Get round from session data
-        candidate_dict = OrderedDict(sorted(candidate_round_list[round]['vote_counts'].items(), key=lambda x: x[0].data)) # Dict of votes for each cand each round
+        round = session["ranked_round"]  # Get round from session data
+        candidate_dict = OrderedDict(
+            sorted(
+                candidate_round_list[round]["vote_counts"].items(),
+                key=lambda x: x[0].data,
+            )
+        )  # Dict of votes for each cand each round
         candidates = [x.name for x in list(candidate_dict.keys())]
         vote_numbers = list(candidate_dict.values())
         bar_colors = [str(x.color) for x in list(candidate_dict.keys())]
         max_num = -1
         winner = "NOT AVAILABLE"
-        for candidate in candidate_dict: # Algorithm to find the winner (most votes)
+        for candidate in candidate_dict:  # Algorithm to find the winner (most votes)
             if candidate_dict[candidate] > max_num:
                 max_num = candidate_dict[candidate]
                 winner = candidate.name
                 session["ranked_winner"] = candidate
         bar_outlines = []
-        for candidate,color in zip(list(candidate_dict.keys()),bar_colors):
+        for candidate, color in zip(list(candidate_dict.keys()), bar_colors):
             if candidate.name == winner:
-                bar_outlines.append('rgba(255, 215, 0, 1)') # HTML RGB color for gold, outline winner in gold
+                bar_outlines.append(
+                    "rgba(255, 215, 0, 1)"
+                )  # HTML RGB color for gold, outline winner in gold
             else:
-                bar_outlines.append(hex_to_rgb(color,0.5)) # Outline non-winners in lighter version of bar color
+                bar_outlines.append(
+                    hex_to_rgb(color, 0.5)
+                )  # Outline non-winners in lighter version of bar color
         return render_template(
             "ranked.html",
             candidates=candidates,
@@ -383,13 +472,17 @@ def tideman():
     if request.method == "GET":
         distribution_type = session.get("distribution_type")
         if not distribution_type:
-            distribution_type = 'normal'
-        distribution = type_to_dist[distribution_type] # Generate the distribution
-        candidate_win_dict = data_frame.ranked_pairs_voting(distribution, session["candidate_list"]) # Generate the dictionary of candidates and wins
+            distribution_type = "normal"
+        distribution = type_to_dist[distribution_type]  # Generate the distribution
+        candidate_win_dict = data_frame.ranked_pairs_voting(
+            distribution, session["candidate_list"]
+        )  # Generate the dictionary of candidates and wins
 
-        session["tideman"] = candidate_win_dict # Save data for Tideman voting
-    
-        candidate_dict = OrderedDict(sorted(candidate_win_dict[0].items(), key=lambda x: x[0].data))
+        session["tideman"] = candidate_win_dict  # Save data for Tideman voting
+
+        candidate_dict = OrderedDict(
+            sorted(candidate_win_dict[0].items(), key=lambda x: x[0].data)
+        )
         candidates = [x.name for x in list(candidate_dict.keys())]
         node_list = []
         edge_list = []
@@ -397,55 +490,75 @@ def tideman():
         num_candidates = 0
         winner = "TIE"
 
-        style_list.append({ # Append generic style for each node in JSON-like format
-            'selector': 'node',
-            'style': {
-                'label': 'data(name)',
-                'border-color': '#000',
-                'border-width': 3,
-                'border-opacity': 0.5,
-                'background-color': 'data(color)'
-            },
-        })
-        style_list.append({ # Apply generic style for each edge in JSON-like format
-            'selector': 'edge',
-            'style': {
-                'curve-style': 'bezier',
-                'width': 3,
-                'line-color': '#ccc',
-                'target-arrow-color': '#ccc',
-                'target-arrow-shape': 'triangle'
+        style_list.append(
+            {  # Append generic style for each node in JSON-like format
+                "selector": "node",
+                "style": {
+                    "label": "data(name)",
+                    "border-color": "#000",
+                    "border-width": 3,
+                    "border-opacity": 0.5,
+                    "background-color": "data(color)",
+                },
             }
-        })
+        )
+        style_list.append(
+            {  # Apply generic style for each edge in JSON-like format
+                "selector": "edge",
+                "style": {
+                    "curve-style": "bezier",
+                    "width": 3,
+                    "line-color": "#ccc",
+                    "target-arrow-color": "#ccc",
+                    "target-arrow-shape": "triangle",
+                },
+            }
+        )
 
-        id = lambda candidate : candidate.name+"_"+str(candidate.data)
+        id = lambda candidate: candidate.name + "_" + str(candidate.data)
         num_candidates = len(candidate_dict.keys())
 
         for candidate in candidate_win_dict[0].keys():
-            for win in candidate_win_dict[0][candidate]: # Determine who has the most wins as the winner
-                win_dict = {"data": {"source": id(win), "target": id(candidate)}} 
-                edge_list.append(win_dict) # Append edge to list of nodes in Cytoscape.js
-            if len(candidate_win_dict[0][candidate]) == num_candidates-1:
+            for win in candidate_win_dict[0][
+                candidate
+            ]:  # Determine who has the most wins as the winner
+                win_dict = {"data": {"source": id(win), "target": id(candidate)}}
+                edge_list.append(
+                    win_dict
+                )  # Append edge to list of nodes in Cytoscape.js
+            if len(candidate_win_dict[0][candidate]) == num_candidates - 1:
                 session["tideman_winner"] = candidate
-                winner = candidate.name # Algorithm for detecting who has the max wins
+                winner = candidate.name  # Algorithm for detecting who has the max wins
                 winner_id = id(candidate)
         for candidate in candidate_dict.keys():
             if id(candidate) == winner_id:
-                cand_dict = {"data": {"id": id(candidate), "name": candidate.name, "color": candidate.color, "winner": 'true'}} 
+                cand_dict = {
+                    "data": {
+                        "id": id(candidate),
+                        "name": candidate.name,
+                        "color": candidate.color,
+                        "winner": "true",
+                    }
+                }
             else:
-                cand_dict = {"data": {"id": id(candidate), "name": candidate.name, "color": candidate.color, "winner": 'false'}} 
-            node_list.append(cand_dict) # Append node to list of nodes in Cytoscape.js
+                cand_dict = {
+                    "data": {
+                        "id": id(candidate),
+                        "name": candidate.name,
+                        "color": candidate.color,
+                        "winner": "false",
+                    }
+                }
+            node_list.append(cand_dict)  # Append node to list of nodes in Cytoscape.js
             # style_list.append({"selector": "#"+candidate.name, "style": {"background-color": str(candidate.color)}}) # Append node-specific style
 
-        style_list.append({ # Apply special style to the winner
-            'selector': "node[winner = 'true']",
-            'style': {
-                'border-color': 'gold'
+        style_list.append(
+            {  # Apply special style to the winner
+                "selector": "node[winner = 'true']",
+                "style": {"border-color": "gold"},
             }
-        })
+        )
 
-        print(winner)
-        
         return render_template(
             "tideman.html",
             candidates=candidates,
@@ -453,33 +566,53 @@ def tideman():
             node_list=node_list,
             edge_list=edge_list,
             style_list=style_list,
-            winner=winner
+            winner=winner,
         )
-    
+
     return redirect("/summary")
 
+
 @app.route("/summary", methods=["GET", "POST"])
-def summary(): 
+def summary():
     if request.method == "GET":
         tideman_winner = session["tideman_winner"]
         ranked_winner = session["ranked_winner"]
         popular_winner = session["popular_winner"]
+        # Define the ranges and corresponding labels
+        political_labels = [
+            (0.2, "Right Wing"),
+            (-0.201, "Moderate"),
+            (float("-inf"), "Left Wing"),
+        ]
+
+        # Function to assign political alignment
+        def assign_political_alignment(winner):
+            for threshold, label in political_labels:
+                if winner.data > threshold:
+                    winner.political = label
+                    break
+
+        # Apply the function to each winner
+        assign_political_alignment(tideman_winner)
+        assign_political_alignment(ranked_winner)
+        assign_political_alignment(popular_winner)
         return render_template(
             "summary.html",
             popular=popular_winner,
             ranked=ranked_winner,
             tideman=tideman_winner,
-            saved=False
+            saved=False,
         )
-    
-    
+
     if request.form.get("action") == "homepage":
         return redirect("/")
     elif request.form.get("action") != "save":
         return apology("403: Invalid form submission.", 403)
     else:
         return redirect("/save")
-'''
+
+
+"""
 @app.route("/save", methods=["GET", "POST"])
 @login_required
 def save():
@@ -515,8 +648,8 @@ def save():
         )
     
     return redirect("/")
-'''
-'''
+"""
+"""
 @app.route("/simulations")
 @login_required
 def simulations():
@@ -545,7 +678,7 @@ def simulations():
             cards.append({"title": simulation.distribution_type.replace("_"," ").title(), "content": card_content}) # Formats title of card
 
         return render_template("simulations.html", simulation_dict=simulation_dict, cards=cards)
-'''
+"""
 '''
 @app.route("/logout")
 def logout():
@@ -649,8 +782,10 @@ def register():
     return redirect("/")
 '''
 
+
 def main():
     app.run()
+
 
 if __name__ == "__main__":
     main()
