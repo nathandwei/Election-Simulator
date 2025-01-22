@@ -5,17 +5,44 @@ Summary
 {% block main %}
 <h1 class="my-3 text-center">Summary</h1>
 
-<h1 class="my-3 text-center">{{popular.name}}</h1>
-<h1 class="my-3 text-center">{{ranked.name}}</h1>
-<h1 class="my-3 text-center">{{tideman.name}}</h1>
-<h1 class="my-3 text-center">{{popular.political}}</h1>
-<h1 class="my-3 text-center">{{ranked.political}}</h1>
-<h1 class="my-3 text-center">{{tideman.political}}</h1>
-<h1 class="my-3 text-center">{{popular.data}}</h1>
-<h1 class="my-3 text-center">{{ranked.data}}</h1>
-<h1 class="my-3 text-center">{{tideman.data}}</h1>
+
+<body>
+    <div class="columns">
+        <div class="column">
+            <h2 class="my-3 text-center"><u>Popular Vote</u></h2>
+            <h2 class="my-3 text-center">Winner:</h2>
+            <div class="circle" style="background-color: {{popular.color}};">{{popular.name}}</div>
+            <h3 class="my-3 text-center">Political Affiliation:</h3>
+            <h3 class="my-3 text-center">{{popular.political}}</h3>
+        </div>
+        <div class="column">
+            <h2 class="my-3 text-center"><u>Ranked Choice</u></h2>
+            <h2 class="my-3 text-center">Winner:</h2>
+            <div class="circle" style="background-color: {{ranked.color}};">{{ranked.name}}</div>
+            <h3 class="my-3 text-center">Political Affiliation:</h3>
+            <h3 class="my-3 text-center">{{ranked.political}}</h3>
+        </div>
+        <div class="column">
+            <h2 class="my-3 text-center"><u>Tideman</u></h2>
+            <h2 class="my-3 text-center">Winner:</h2>
+            <div class="circle" style="background-color: {{tideman.color}};">{{tideman.name}}</div>
+            <h3 class="my-3 text-center">Political Affiliation:</h3>
+            <h3 class="my-3 text-center">{{tideman.political}}</h3>
+        </div>
+    </div>
+
+</body>
 
 <div class="my-3 text-center">
+   <p>
+      You may find it suprising different voting systems can yield different winners when the votes are the same.
+   </p>
+   <p style="max-width: 800px; margin: 0 auto;">
+      This is because The Popular Vote ignores preferences beyond first choice, Ranked Choice reflects broader support by redistributing votes, and the Tideman Method uses head-to-head matchups to find the most preferred candidate overall, which tends to favor moderate candidates.
+   </p>
+   <p>
+
+   </p>
    <p>
       Head back to the homepage and start a new simulation.<br>
    </p>
